@@ -33,11 +33,11 @@ public:
 		uintptr_t base_address{};
 		return base_address;
 	}
-	template<typename T> T write(uint64_t address, T buffer)
+	template<typename T> void write(uintptr_t address, T value)
 	{
-		return buffer;
+
 	}
-	template<typename T> T read(uint64_t address)
+	template<typename T> T read(uintptr_t address)
 	{
 		T buffer{};
 		return buffer;

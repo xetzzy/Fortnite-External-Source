@@ -28,7 +28,7 @@ HRESULT directx_init()
 	p_params.BackBufferHeight = settings::height;
 	p_params.EnableAutoDepthStencil = TRUE;
 	p_params.AutoDepthStencilFormat = D3DFMT_D16;
-	p_params.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+	p_params.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	if (FAILED(p_object->CreateDeviceEx(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, my_wnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &p_params, 0, &p_device)))
 	{
 		p_object->Release();
@@ -43,6 +43,7 @@ HRESULT directx_init()
 	style->WindowTitleAlign = { 0.5f, 0.5f };
 	style->FrameBorderSize = 1.0f;
 	style->ChildBorderSize = 1.0f;
+	style->ItemSpacing = ImVec2(8, 8);
 	style->Colors[ImGuiCol_Text] = ImColor(250, 250, 250, 255);
 	style->Colors[ImGuiCol_TitleBg] = ImColor(10, 10, 10, 255);
 	style->Colors[ImGuiCol_TitleBgActive] = ImColor(10, 10, 10, 255);
@@ -65,7 +66,7 @@ HRESULT directx_init()
 
 void create_overlay()
 {
-	WNDCLASSEXA wcex = {
+	WNDCLASSEXA wcsex = {
 		sizeof(WNDCLASSEXA),
 		0,
 		DefWindowProcA,
@@ -81,8 +82,8 @@ void create_overlay()
 	};
 	RECT rect;
 	GetWindowRect(GetDesktopWindow(), &rect);
-	RegisterClassExA(&wcex);
-	my_wnd = CreateWindowExA(NULL, (_("Not A Suspect Window Class")), (_("Not A Suspect Window Title")), WS_POPUP, rect.left, rect.top, rect.right, rect.bottom, NULL, NULL, wcex.hInstance, NULL);
+	RegisterClassExA(&wcsex);
+	my_wnd = CreateWindowExA(NULL, (_("Not A Suspect Window Class")), (_("Not A Suspect Window Title")), WS_POPUP, rect.left, rect.top, rect.right, rect.bottom, NULL, NULL, wcsex.hInstance, NULL);
 	SetWindowLong(my_wnd, GWL_EXSTYLE, WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_LAYERED);
 	MARGINS margin = { -1 };
 	DwmExtendFrameIntoClientArea(my_wnd, &margin);
@@ -114,6 +115,11 @@ void aimbot(uintptr_t target_pawn, uintptr_t closest_distance)
 		closest_distance = FLT_MAX;
 		target_pawn = NULL;
 	}
+	if (!IsVisible(mesh))
+	{
+		closest_distance = FLT_MAX;
+		target_pawn = NULL;
+	}
 	Vector3 head3d = GetBoneWithRotation(mesh, 68);
 	Vector2 head2d = ProjectWorldToScreen(head3d);
 	double dx = head2d.x - (settings::width / 2);
@@ -126,40 +132,37 @@ void aimbot(uintptr_t target_pawn, uintptr_t closest_distance)
 	}
 	Vector2 screen_center = { (double)settings::width / 2, (double)settings::height / 2 };
 	Vector2 target{};
-	if (IsVisible(mesh))
+	if (head2d.x != 0)
 	{
-		if (head2d.x != 0)
+		if (head2d.x > screen_center.x)
 		{
-			if (head2d.x > screen_center.x)
-			{
-				target.x = -(screen_center.x - head2d.x);
-				target.x /= settings::aimbot::smoothness;
-				if (target.x + screen_center.x > screen_center.x * 2) target.x = 0;
-			}
-			if (head2d.x < screen_center.x)
-			{
-				target.x = head2d.x - screen_center.x;
-				target.x /= settings::aimbot::smoothness;
-				if (target.x + screen_center.x < 0) target.x = 0;
-			}
+			target.x = -(screen_center.x - head2d.x);
+			target.x /= settings::aimbot::smoothness;
+			if (target.x + screen_center.x > screen_center.x * 2) target.x = 0;
 		}
-		if (head2d.y != 0)
+		if (head2d.x < screen_center.x)
 		{
-			if (head2d.y > screen_center.y)
-			{
-				target.y = -(screen_center.y - head2d.y);
-				target.y /= settings::aimbot::smoothness;
-				if (target.y + screen_center.y > screen_center.y * 2) target.y = 0;
-			}
-			if (head2d.y < screen_center.y)
-			{
-				target.y = head2d.y - screen_center.y;
-				target.y /= settings::aimbot::smoothness;
-				if (target.y + screen_center.y < 0) target.y = 0;
-			}
+			target.x = head2d.x - screen_center.x;
+			target.x /= settings::aimbot::smoothness;
+			if (target.x + screen_center.x < 0) target.x = 0;
 		}
-		Input::MoveMouse(target.x, target.y);
 	}
+	if (head2d.y != 0)
+	{
+		if (head2d.y > screen_center.y)
+		{
+			target.y = -(screen_center.y - head2d.y);
+			target.y /= settings::aimbot::smoothness;
+			if (target.y + screen_center.y > screen_center.y * 2) target.y = 0;
+		}
+		if (head2d.y < screen_center.y)
+		{
+			target.y = head2d.y - screen_center.y;
+			target.y /= settings::aimbot::smoothness;
+			if (target.y + screen_center.y < 0) target.y = 0;
+		}
+	}
+	Input::MoveMouse(target.x, target.y);
 }
 
 void draw_cornered_box(int x, int y, int w, int h, const ImColor color, int thickness)
@@ -187,43 +190,42 @@ void draw_line(Vector2 target, ImColor color)
 void game_loop()
 {
 	pointer::uworld = driver.read<uintptr_t>(driver.base_address + 0xED541C8);
-	uintptr_t game_instance = driver.read<uintptr_t>(pointer::uworld + 0x1B8);
-	pointer::local_players = driver.read<uintptr_t>(driver.read<uintptr_t>(game_instance + 0x38));
-	uintptr_t player_controller = driver.read<uintptr_t>(pointer::local_players + 0x30);
-	uintptr_t local_pawn = driver.read<uintptr_t>(player_controller + 0x330);
-	pointer::root_component = driver.read<uintptr_t>(local_pawn + 0x190);
-	uintptr_t player_state = driver.read<uintptr_t>(local_pawn + 0x2A8);
-	uintptr_t game_state = driver.read<uintptr_t>(pointer::uworld + 0x158);
-	uintptr_t player_array = driver.read<uintptr_t>(game_state + 0x2A0);
-	int count = driver.read<int>(game_state + (0x2A0 + sizeof(uintptr_t)));
-	float closest_distance = FLT_MAX;
-	uintptr_t closest_pawn = NULL;
+	pointer::game_instance = driver.read<uintptr_t>(pointer::uworld + 0x1B8);
+	pointer::local_players = driver.read<uintptr_t>(driver.read<uintptr_t>(pointer::game_instance + 0x38));
+	pointer::player_controller = driver.read<uintptr_t>(pointer::local_players + 0x30);
+	pointer::local_pawn = driver.read<uintptr_t>(pointer::player_controller + 0x330);
+	pointer::root_component = driver.read<uintptr_t>(pointer::local_pawn + 0x190);
+	pointer::player_state = driver.read<uintptr_t>(pointer::local_pawn + 0x2A8);
+	pointer::game_state = driver.read<uintptr_t>(pointer::uworld + 0x158);
+	pointer::player_array = driver.read<uintptr_t>(pointer::game_state + 0x2A0);
+	pointer::closest_distance = FLT_MAX;
+	pointer::closest_pawn = NULL;
+	int count = driver.read<int>(pointer::game_state + (0x2A0 + sizeof(uintptr_t)));
 	for (int i = 0; i < count; i++)
 	{
-		uintptr_t current_player_state = driver.read<uintptr_t>(player_array + (i * sizeof(uintptr_t)));
+		uintptr_t current_player_state = driver.read<uintptr_t>(pointer::player_array + (i * sizeof(uintptr_t)));
 		if (!current_player_state) continue;
-		int my_team_id = driver.read<int>(player_state + 0x1100);
+		int my_team_id = driver.read<int>(pointer::player_state + 0x1100);
 		int current_actor_team_id = driver.read<int>(current_player_state + 0x1100);
 		if (my_team_id == current_actor_team_id) continue;
 		uintptr_t current_local_pawn_private = driver.read<uintptr_t>(current_player_state + 0x300);
 		if (!current_local_pawn_private) continue;
-		if (current_local_pawn_private == local_pawn) continue;
+		if (current_local_pawn_private == pointer::local_pawn) continue;
 		uintptr_t current_mesh = driver.read<uintptr_t>(current_local_pawn_private + 0x310);
 		if (!current_mesh) continue;
 		Vector3 head3d = GetBoneWithRotation(current_mesh, 68);
 		Vector2 head2d = ProjectWorldToScreen(head3d);
 		Vector3 bottom3d = GetBoneWithRotation(current_mesh, 0);
 		Vector2 bottom2d = ProjectWorldToScreen(bottom3d);
-		float box_height = (float)(head2d.y - bottom2d.y);
 		float corner_height = abs(head2d.y - bottom2d.y);
-		float corner_width = box_height * 0.80;
+		float corner_width = corner_height * 0.80;
 		double dx = head2d.x - (settings::width / 2);
 		double dy = head2d.y - (settings::height / 2);
 		float dist = sqrtf(dx * dx + dy * dy);
-		if (dist < settings::aimbot::fov && dist < closest_distance)
+		if (dist < settings::aimbot::fov && dist < pointer::closest_distance)
 		{
-			closest_distance = dist;
-			closest_pawn = current_local_pawn_private;
+			pointer::closest_distance = dist;
+			pointer::closest_pawn = current_local_pawn_private;
 		}
 		if (settings::visuals::enable)
 		{
@@ -232,12 +234,12 @@ void game_loop()
 				if (IsVisible(current_mesh))
 				{
 					draw_cornered_box(head2d.x - (corner_width / 2), head2d.y, corner_width, corner_height, ImColor(255, 255, 255, 255), 1);
-					if (settings::visuals::filled_box) draw_filled_rect(head2d.x - (corner_width / 2), head2d.y, corner_width, corner_height, ImColor(255, 255, 255, 30));
+					if (settings::visuals::filled_box) draw_filled_rect(head2d.x - (corner_width / 2), head2d.y, corner_width, corner_height, ImColor(255, 255, 255, 20));
 				}
 				else
 				{
 					draw_cornered_box(head2d.x - (corner_width / 2), head2d.y, corner_width, corner_height, ImColor(255, 0, 0, 255), 1);
-					if (settings::visuals::filled_box) draw_filled_rect(head2d.x - (corner_width / 2), head2d.y, corner_width, corner_height, ImColor(255, 0, 0, 30));
+					if (settings::visuals::filled_box) draw_filled_rect(head2d.x - (corner_width / 2), head2d.y, corner_width, corner_height, ImColor(255, 0, 0, 20));
 				}
 			}
 			if (settings::visuals::line)
@@ -257,7 +259,7 @@ void game_loop()
 	{
 		if (Input::GetAsyncKeyState(VK_RBUTTON))
 		{
-			aimbot(closest_pawn, closest_distance);
+			aimbot(pointer::closest_pawn, pointer::closest_distance);
 		}
 	}
 	if (settings::misc::enable)
@@ -266,7 +268,7 @@ void game_loop()
 		{
 			if (Input::GetAsyncKeyState(VK_LBUTTON))
 			{
-				driver.write<float>(player_controller + 0x64, -1);
+				driver.write<float>(pointer::player_controller + 0x64, -1);
 			}
 		}
 	}
@@ -274,12 +276,10 @@ void game_loop()
 
 void render_menu()
 {
-	static int tab = 0;
-	ImGuiStyle* style = &ImGui::GetStyle();
 	if (settings::aimbot::show_fov)
 	{
 		ImGui::GetForegroundDrawList()->AddCircle(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), settings::aimbot::fov, ImColor(255, 255, 255, 255), 100, 1.0f);
-		if (settings::aimbot::filled_fov) ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), settings::aimbot::fov, ImColor(255, 255, 255, 30), 100);
+		if (settings::aimbot::filled_fov) ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), settings::aimbot::fov, ImColor(255, 255, 255, 20), 100);
 	}
 	if (Input::GetAsyncKeyState(VK_INSERT) & 1) settings::show_menu = !settings::show_menu;
 	if (settings::show_menu)
@@ -287,15 +287,14 @@ void render_menu()
 		ImGui::SetNextWindowSize({ 620.f, 350.f });
 		ImGui::Begin(_("Fortnite"), NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 		ImGui::SetCursorPos({ 22.f, 56.f });
-		if (ImGui::Button(_("Aimbot"), { 89.f, 32.f })) tab = 0;
+		if (ImGui::Button(_("Aimbot"), { 89.f, 32.f })) settings::tab = 0;
 		ImGui::SetCursorPos({ 22.f, 93.f });
-		if (ImGui::Button(_("Visuals"), { 89.f, 32.f })) tab = 1;
+		if (ImGui::Button(_("Visuals"), { 89.f, 32.f })) settings::tab = 1;
 		ImGui::SetCursorPos({ 22.f, 130.f });
-		if (ImGui::Button(_("Misc"), { 89.f, 32.f })) tab = 2;
+		if (ImGui::Button(_("Misc"), { 89.f, 32.f })) settings::tab = 2;
 		ImGui::SetCursorPos({ 22.f, 269.f });
 		if (ImGui::Button(_("Unload"), { 89.f, 32.f })) exit(0);
-		style->ItemSpacing = ImVec2(8, 8);
-		switch (tab)
+		switch (settings::tab)
 		{
 		case 0:
 		{
@@ -305,8 +304,8 @@ void render_menu()
 			ImGui::Checkbox(_("Show Fov"), &settings::aimbot::show_fov);
 			ImGui::SameLine();
 			ImGui::Checkbox(_("Filled Fov"), &settings::aimbot::filled_fov);
-			ImGui::SliderFloat(_("##Fov"), &settings::aimbot::fov, 50, 600, _("FOV: %.3f"));
-			ImGui::SliderFloat(_("##Smooth"), &settings::aimbot::smoothness, 2, 20, _("Smoothness: %.3f"));
+			ImGui::SliderFloat(_("##Fov"), &settings::aimbot::fov, 50.0f, 600.0f, _("FOV: %.3f"));
+			ImGui::SliderFloat(_("##Smooth"), &settings::aimbot::smoothness, 3.0f, 20.0f, _("Smoothness: %.3f"));
 			break;
 		}
 		case 1:

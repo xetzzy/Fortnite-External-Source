@@ -3,6 +3,7 @@ namespace settings
 {
 	inline int width = GetSystemMetrics(SM_CXSCREEN);
 	inline int height = GetSystemMetrics(SM_CYSCREEN);
+	inline int tab = 0;
 	inline bool show_menu = true;
 	namespace aimbot
 	{

@@ -4,9 +4,17 @@
 #define M_PI 3.14159265358979323846264338327950288419716939937510
 namespace pointer
 {
-	uintptr_t uworld;
-	uintptr_t local_players;
-	uintptr_t root_component;
+	inline uintptr_t uworld;
+	inline uintptr_t game_instance;
+	inline uintptr_t local_players;
+	inline uintptr_t player_controller;
+	inline uintptr_t local_pawn;
+	inline uintptr_t root_component;
+	inline uintptr_t player_state;
+	inline uintptr_t game_state;
+	inline uintptr_t player_array;
+	inline uintptr_t closest_pawn;
+	inline float closest_distance;
 }
 
 class Vector2
@@ -48,7 +56,10 @@ public:
 	{
 		return Vector3(x - v.x, y - v.y, z - v.z);
 	}
-	Vector3 operator*(double flNum) { return Vector3(x * flNum, y * flNum, z * flNum); }
+	Vector3 operator*(double v)
+	{
+		return Vector3(x * v, y * v, z * v);
+	}
 };
 
 struct FQuat
@@ -68,7 +79,7 @@ struct FTransform
 	char pad1[4];
 	D3DMATRIX ToMatrixWithScale()
 	{
-		D3DMATRIX m;
+		D3DMATRIX m{};
 		m._41 = translation.x;
 		m._42 = translation.y;
 		m._43 = translation.z;
@@ -103,7 +114,7 @@ struct FTransform
 
 D3DMATRIX MatrixMultiplication(D3DMATRIX pM1, D3DMATRIX pM2)
 {
-	D3DMATRIX pOut;
+	D3DMATRIX pOut{};
 	pOut._11 = pM1._11 * pM2._11 + pM1._12 * pM2._21 + pM1._13 * pM2._31 + pM1._14 * pM2._41;
 	pOut._12 = pM1._11 * pM2._12 + pM1._12 * pM2._22 + pM1._13 * pM2._32 + pM1._14 * pM2._42;
 	pOut._13 = pM1._11 * pM2._13 + pM1._12 * pM2._23 + pM1._13 * pM2._33 + pM1._14 * pM2._43;
@@ -134,7 +145,7 @@ D3DMATRIX Matrix(Vector3 rot, Vector3 origin)
 	float CY = cosf(radYaw);
 	float SR = sinf(radRoll);
 	float CR = cosf(radRoll);
-	D3DMATRIX matrix;
+	D3DMATRIX matrix{};
 	matrix.m[0][0] = CP * CY;
 	matrix.m[0][1] = CP * SY;
 	matrix.m[0][2] = SP;
@@ -154,6 +165,25 @@ D3DMATRIX Matrix(Vector3 rot, Vector3 origin)
 	return matrix;
 }
 
+Vector3 GetBoneWithRotation(uintptr_t mesh, int id)
+{
+	uintptr_t bone_array = driver.read<uintptr_t>(mesh + 0x5D0);
+	int is_bone_array_cached = driver.read<int>(mesh + 0x618);
+	if (is_bone_array_cached) bone_array = driver.read<uintptr_t>(mesh + 0x5E0);
+	FTransform bone = driver.read<FTransform>(bone_array + (id * 0x60));
+	FTransform component_to_world = driver.read<FTransform>(mesh + 0x240);
+	D3DMATRIX matrix = MatrixMultiplication(bone.ToMatrixWithScale(), component_to_world.ToMatrixWithScale());
+	return Vector3(matrix._41, matrix._42, matrix._43);
+}
+
+bool IsVisible(uintptr_t mesh)
+{
+	float last_sumbit_time = driver.read<float>(mesh + 0x338);
+	float last_render_time_on_screen = driver.read<float>(mesh + 0x340);
+	bool visible = last_render_time_on_screen + 0.06f >= last_sumbit_time;
+	return visible;
+}
+
 struct Camera
 {
 	Vector3 Location;
@@ -163,7 +193,7 @@ struct Camera
 
 Camera GetViewAngles()
 {
-	Camera local_camera;
+	Camera local_camera{};
 	uintptr_t chain69 = driver.read<uintptr_t>(pointer::uworld + 0x110);
 	local_camera.Location = driver.read<Vector3>(chain69);
 	uintptr_t view_matrix = driver.read<uintptr_t>(pointer::local_players + 0xD0);
@@ -189,23 +219,4 @@ Vector2 ProjectWorldToScreen(Vector3 world_location)
 	if (vtransformed.z < 1.f)
 		vtransformed.z = 1.f;
 	return Vector2((settings::width / 2.0f) + vtransformed.x * (((settings::width / 2.0f) / tanf(local_camera.FieldOfView * (float)M_PI / 360.f))) / vtransformed.z, (settings::height / 2.0f) - vtransformed.y * (((settings::width / 2.0f) / tanf(local_camera.FieldOfView * (float)M_PI / 360.f))) / vtransformed.z);
-}
-
-Vector3 GetBoneWithRotation(uintptr_t mesh, int id)
-{
-	uintptr_t bone_array = driver.read<uintptr_t>(mesh + 0x5D0);
-	int is_bone_array_cached = driver.read<int>(mesh + 0x618);
-	if (is_bone_array_cached) bone_array = driver.read<uintptr_t>(mesh + 0x5D0 + 0x10);
-	FTransform bone = driver.read<FTransform>(bone_array + id * 0x60);
-	FTransform component_to_world = driver.read<FTransform>(mesh + 0x240);
-	D3DMATRIX matrix = MatrixMultiplication(bone.ToMatrixWithScale(), component_to_world.ToMatrixWithScale());
-	return Vector3(matrix._41, matrix._42, matrix._43);
-}
-
-bool IsVisible(uintptr_t mesh)
-{
-	float last_sumbit_time = driver.read<float>(mesh + 0x338);
-	float last_render_time_on_screen = driver.read<float>(mesh + 0x340);
-	bool visible = last_render_time_on_screen + 0.06f >= last_sumbit_time;
-	return visible;
 }
