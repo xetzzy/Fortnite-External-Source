@@ -120,7 +120,7 @@ void aimbot(uintptr_t target_pawn, uintptr_t closest_distance)
 		closest_distance = FLT_MAX;
 		target_pawn = NULL;
 	}
-	Vector3 head3d = GetBoneWithRotation(mesh, 68);
+	Vector3 head3d = GetBoneWithRotation(mesh, 106);
 	Vector2 head2d = ProjectWorldToScreen(head3d);
 	double dx = head2d.x - (settings::width / 2);
 	double dy = head2d.y - (settings::height / 2);
@@ -213,7 +213,7 @@ void game_loop()
 		if (current_local_pawn_private == pointer::local_pawn) continue;
 		uintptr_t current_mesh = driver.read<uintptr_t>(current_local_pawn_private + 0x310);
 		if (!current_mesh) continue;
-		Vector3 head3d = GetBoneWithRotation(current_mesh, 68);
+		Vector3 head3d = GetBoneWithRotation(current_mesh, 106);
 		Vector2 head2d = ProjectWorldToScreen(head3d);
 		Vector3 bottom3d = GetBoneWithRotation(current_mesh, 0);
 		Vector2 bottom2d = ProjectWorldToScreen(bottom3d);
