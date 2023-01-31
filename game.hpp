@@ -77,13 +77,13 @@ void create_overlay()
 		LoadCursor(nullptr, IDC_ARROW),
 		nullptr,
 		nullptr,
-		(_("Not A Suspect Window Class")),
+		(_("A Not Suspect Window Class")),
 		LoadIcon(nullptr, IDI_APPLICATION)
 	};
 	RECT rect;
 	GetWindowRect(GetDesktopWindow(), &rect);
 	RegisterClassExA(&wcsex);
-	my_wnd = CreateWindowExA(NULL, (_("Not A Suspect Window Class")), (_("Not A Suspect Window Title")), WS_POPUP, rect.left, rect.top, rect.right, rect.bottom, NULL, NULL, wcsex.hInstance, NULL);
+	my_wnd = CreateWindowExA(NULL, (_("A Not Suspect Window Class")), (_("A Not Suspect Window Title")), WS_POPUP, rect.left, rect.top, rect.right, rect.bottom, NULL, NULL, wcsex.hInstance, NULL);
 	SetWindowLong(my_wnd, GWL_EXSTYLE, WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_LAYERED);
 	MARGINS margin = { -1 };
 	DwmExtendFrameIntoClientArea(my_wnd, &margin);
@@ -115,12 +115,7 @@ void aimbot(uintptr_t target_pawn, uintptr_t closest_distance)
 		closest_distance = FLT_MAX;
 		target_pawn = NULL;
 	}
-	if (!IsVisible(mesh))
-	{
-		closest_distance = FLT_MAX;
-		target_pawn = NULL;
-	}
-	Vector3 head3d = GetBoneWithRotation(mesh, 68);
+	Vector3 head3d = GetBoneWithRotation(mesh, 106);
 	Vector2 head2d = ProjectWorldToScreen(head3d);
 	double dx = head2d.x - (settings::width / 2);
 	double dy = head2d.y - (settings::height / 2);
@@ -132,37 +127,40 @@ void aimbot(uintptr_t target_pawn, uintptr_t closest_distance)
 	}
 	Vector2 screen_center = { (double)settings::width / 2, (double)settings::height / 2 };
 	Vector2 target{};
-	if (head2d.x != 0)
+	if (IsVisible(mesh))
 	{
-		if (head2d.x > screen_center.x)
+		if (head2d.x != 0)
 		{
-			target.x = -(screen_center.x - head2d.x);
-			target.x /= settings::aimbot::smoothness;
-			if (target.x + screen_center.x > screen_center.x * 2) target.x = 0;
+			if (head2d.x > screen_center.x)
+			{
+				target.x = -(screen_center.x - head2d.x);
+				target.x /= settings::aimbot::smoothness;
+				if (target.x + screen_center.x > screen_center.x * 2) target.x = 0;
+			}
+			if (head2d.x < screen_center.x)
+			{
+				target.x = head2d.x - screen_center.x;
+				target.x /= settings::aimbot::smoothness;
+				if (target.x + screen_center.x < 0) target.x = 0;
+			}
 		}
-		if (head2d.x < screen_center.x)
+		if (head2d.y != 0)
 		{
-			target.x = head2d.x - screen_center.x;
-			target.x /= settings::aimbot::smoothness;
-			if (target.x + screen_center.x < 0) target.x = 0;
+			if (head2d.y > screen_center.y)
+			{
+				target.y = -(screen_center.y - head2d.y);
+				target.y /= settings::aimbot::smoothness;
+				if (target.y + screen_center.y > screen_center.y * 2) target.y = 0;
+			}
+			if (head2d.y < screen_center.y)
+			{
+				target.y = head2d.y - screen_center.y;
+				target.y /= settings::aimbot::smoothness;
+				if (target.y + screen_center.y < 0) target.y = 0;
+			}
 		}
+		Input::MoveMouse(target.x, target.y);
 	}
-	if (head2d.y != 0)
-	{
-		if (head2d.y > screen_center.y)
-		{
-			target.y = -(screen_center.y - head2d.y);
-			target.y /= settings::aimbot::smoothness;
-			if (target.y + screen_center.y > screen_center.y * 2) target.y = 0;
-		}
-		if (head2d.y < screen_center.y)
-		{
-			target.y = head2d.y - screen_center.y;
-			target.y /= settings::aimbot::smoothness;
-			if (target.y + screen_center.y < 0) target.y = 0;
-		}
-	}
-	Input::MoveMouse(target.x, target.y);
 }
 
 void draw_cornered_box(int x, int y, int w, int h, const ImColor color, int thickness)
@@ -213,7 +211,7 @@ void game_loop()
 		if (current_local_pawn_private == pointer::local_pawn) continue;
 		uintptr_t current_mesh = driver.read<uintptr_t>(current_local_pawn_private + 0x310);
 		if (!current_mesh) continue;
-		Vector3 head3d = GetBoneWithRotation(current_mesh, 68);
+		Vector3 head3d = GetBoneWithRotation(current_mesh, 106);
 		Vector2 head2d = ProjectWorldToScreen(head3d);
 		Vector3 bottom3d = GetBoneWithRotation(current_mesh, 0);
 		Vector2 bottom2d = ProjectWorldToScreen(bottom3d);
@@ -305,7 +303,7 @@ void render_menu()
 			ImGui::SameLine();
 			ImGui::Checkbox(_("Filled Fov"), &settings::aimbot::filled_fov);
 			ImGui::SliderFloat(_("##Fov"), &settings::aimbot::fov, 50.0f, 600.0f, _("FOV: %.3f"));
-			ImGui::SliderFloat(_("##Smooth"), &settings::aimbot::smoothness, 3.0f, 20.0f, _("Smoothness: %.3f"));
+			ImGui::SliderFloat(_("##Smooth"), &settings::aimbot::smoothness, 1.0f, 20.0f, _("Smoothness: %.3f"));
 			break;
 		}
 		case 1:

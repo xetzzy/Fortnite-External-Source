@@ -167,8 +167,9 @@ D3DMATRIX Matrix(Vector3 rot, Vector3 origin)
 
 Vector3 GetBoneWithRotation(uintptr_t mesh, int bone_id)
 {
-	int bone_cache = driver.read<int>(mesh + 0x630);
-	FTransform bone = driver.read<FTransform>(driver.read<uintptr_t>(mesh + 0x10 * bone_cache + 0x5E8) + 0x60 * bone_id);
+	uintptr_t bone_array = driver.read<uintptr_t>(mesh + 0x5E8);
+	if (bone_array == NULL) bone_array = driver.read<uintptr_t>(mesh + 0x5F8);
+	FTransform bone = driver.read<FTransform>(bone_array + (bone_id * 0x60));
 	FTransform component_to_world = driver.read<FTransform>(mesh + 0x240);
 	D3DMATRIX matrix = MatrixMultiplication(bone.ToMatrixWithScale(), component_to_world.ToMatrixWithScale());
 	return Vector3(matrix._41, matrix._42, matrix._43);
