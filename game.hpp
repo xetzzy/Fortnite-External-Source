@@ -189,7 +189,7 @@ void draw_line(Vector2 target, ImColor color)
 
 void game_loop()
 {
-	pointer::uworld = driver.read<uintptr_t>(driver.base_address + 0xED541C8);
+	pointer::uworld = driver.read<uintptr_t>(driver.base_address + 0xEC18148);
 	pointer::game_instance = driver.read<uintptr_t>(pointer::uworld + 0x1B8);
 	pointer::local_players = driver.read<uintptr_t>(driver.read<uintptr_t>(pointer::game_instance + 0x38));
 	pointer::player_controller = driver.read<uintptr_t>(pointer::local_players + 0x30);

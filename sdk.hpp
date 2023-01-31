@@ -165,12 +165,10 @@ D3DMATRIX Matrix(Vector3 rot, Vector3 origin)
 	return matrix;
 }
 
-Vector3 GetBoneWithRotation(uintptr_t mesh, int id)
+Vector3 GetBoneWithRotation(uintptr_t mesh, int bone_id)
 {
-	uintptr_t bone_array = driver.read<uintptr_t>(mesh + 0x5D0);
-	int is_bone_array_cached = driver.read<int>(mesh + 0x618);
-	if (is_bone_array_cached) bone_array = driver.read<uintptr_t>(mesh + 0x5E0);
-	FTransform bone = driver.read<FTransform>(bone_array + (id * 0x60));
+	int bone_cache = driver.read<int>(mesh + 0x630);
+	FTransform bone = driver.read<FTransform>(driver.read<uintptr_t>(mesh + 0x10 * bone_cache + 0x5E8) + 0x60 * bone_id);
 	FTransform component_to_world = driver.read<FTransform>(mesh + 0x240);
 	D3DMATRIX matrix = MatrixMultiplication(bone.ToMatrixWithScale(), component_to_world.ToMatrixWithScale());
 	return Vector3(matrix._41, matrix._42, matrix._43);
@@ -178,8 +176,8 @@ Vector3 GetBoneWithRotation(uintptr_t mesh, int id)
 
 bool IsVisible(uintptr_t mesh)
 {
-	float last_sumbit_time = driver.read<float>(mesh + 0x338);
-	float last_render_time_on_screen = driver.read<float>(mesh + 0x340);
+	float last_sumbit_time = driver.read<float>(mesh + 0x358);
+	float last_render_time_on_screen = driver.read<float>(mesh + 0x360);
 	bool visible = last_render_time_on_screen + 0.06f >= last_sumbit_time;
 	return visible;
 }
