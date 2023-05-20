@@ -1,5 +1,5 @@
 #pragma once
-#define UWORLD 0x10567408
+#define UWORLD 0x103018D8
 #define GAME_INSTANCE 0x1B8
 #define LOCAL_PLAYERS 0x38
 #define PLAYER_CONTROLLER 0x30
@@ -8,7 +8,7 @@
 #define ROOT_COMPONENT 0x190
 #define RELATIVE_LOCATION 0x128
 #define PLAYER_STATE 0x2A8
-#define TEAM_INDEX 0x10B0
+#define TEAM_INDEX 0x10B8
 #define GAME_STATE 0x158
 #define PLAYER_ARRAY 0x2A0
 #define MESH 0x310
