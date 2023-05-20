@@ -5,7 +5,7 @@ Features:
 [Aimbot]
 - Aim Fov Size
 - Aim Show Fov
-- Aim Smoothness                                                                                                             
+- Aim Smoothness   
 [Visuals]
 - Esp Box & Filled Box
 - Esp Lines
