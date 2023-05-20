@@ -1,12 +1,12 @@
-[ External Fortnite Cheat Source ]                                                                                        
+[External Fortnite Cheat Source]                                                                                        
 Old UC Thread: https://www.unknowncheats.me/forum/fortnite/568561-fortnite-external-cheat-source.html
 
 Features:                                                                                                                    
-[ Aimbot ]
+[Aimbot]
 - Aim Fov Size
 - Aim Show Fov
 - Aim Smoothness                                                                                                             
-[ Visuals ]
+[Visuals]
 - Esp Box & Filled Box
 - Esp Lines
 - Esp Distance
