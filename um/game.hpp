@@ -37,9 +37,27 @@ HRESULT directx_init()
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.IniFilename = 0;
 	ImGuiStyle* style = &ImGui::GetStyle();
-	style->WindowBorderSize = 0;
+	style->WindowBorderSize = 1;
+	style->FrameBorderSize = 1;
 	style->WindowTitleAlign = { 0.5f, 0.5f };
 	style->Colors[ImGuiCol_BorderShadow] = ImColor(0, 0, 0, 0);
+	style->Colors[ImGuiCol_Border] = ImColor(8, 8, 8, 250);
+	style->Colors[ImGuiCol_TitleBg] = ImColor(38, 38, 38, 250);
+	style->Colors[ImGuiCol_TitleBgActive] = ImColor(38, 38, 38, 250);
+	style->Colors[ImGuiCol_WindowBg] = ImColor(38, 38, 38, 250);
+	style->Colors[ImGuiCol_FrameBg] = ImColor(38, 38, 38, 245);
+	style->Colors[ImGuiCol_FrameBgActive] = ImColor(38, 38, 38, 245);
+	style->Colors[ImGuiCol_FrameBgHovered] = ImColor(38, 38, 38, 245);
+	style->Colors[ImGuiCol_Button] = ImColor(38, 38, 38, 245);
+	style->Colors[ImGuiCol_ButtonActive] = ImColor(38, 38, 38, 245);
+	style->Colors[ImGuiCol_ButtonHovered] = ImColor(38, 38, 38, 245);
+	style->Colors[ImGuiCol_SliderGrab] = ImColor(68, 68, 68, 250);
+	style->Colors[ImGuiCol_SliderGrabActive] = ImColor(68, 68, 68, 250);
+	style->Colors[ImGuiCol_CheckMark] = ImColor(68, 68, 68, 250);
+	style->Colors[ImGuiCol_Header] = ImColor(68, 68, 68, 250);
+	style->Colors[ImGuiCol_HeaderActive] = ImColor(0, 0, 0, 0);
+	style->Colors[ImGuiCol_HeaderHovered] = ImColor(68, 68, 68, 250);
+	style->Colors[ImGuiCol_PopupBg] = ImColor(38, 38, 38, 250);
 	p_object->Release();
 	return S_OK;
 }
