@@ -4,7 +4,7 @@
 
 void request_handler(uintptr_t request)
 {
-	PDRIVER_REQUEST in = reinterpret_cast<PDRIVER_REQUEST>(request);
+	PDRIVER_REQUEST in = (PDRIVER_REQUEST)request;
 	switch (in->type)
 	{
 		case BASE:
