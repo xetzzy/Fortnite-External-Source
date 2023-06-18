@@ -195,6 +195,7 @@ Camera get_view_point()
         v1 += i + 0x17;
         v2++;
     }
+    return view_point;
 }
 
 Vector2 project_world_to_screen(Vector3 world_location)
