@@ -142,6 +142,7 @@ typedef struct _IMAGE_SECTION_HEADER
 
 enum REQUEST_TYPE : int
 {
+	NONE,
 	BASE,
 	WRITE,
 	READ
