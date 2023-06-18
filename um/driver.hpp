@@ -8,6 +8,7 @@ private:
 	NtUserFunction nt_user_function = 0;
 	enum REQUEST_TYPE : INT
 	{
+		NONE,
 		BASE,
 		WRITE,
 		READ
