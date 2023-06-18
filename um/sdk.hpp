@@ -165,7 +165,7 @@ namespace cache
 	inline Camera local_camera;
 }
 
-Camera get_view_angles()
+/*Camera get_view_angles() old
 {
 	Camera local_camera{};
 	uintptr_t view_location = driver.read<uintptr_t>(cache::uworld + 0x110);
@@ -178,11 +178,28 @@ Camera get_view_angles()
 	local_camera.rotation.x = (asin(local_camera.rotation.x)) * (180 / M_PI);
 	if (local_camera.rotation.y < 0) local_camera.rotation.y = 360 + local_camera.rotation.y;
 	return local_camera;
+}*/
+
+Camera get_view_point()
+{
+    char v1;
+    Camera view_point = driver.read<Camera>(driver.base_address + 0xF0E8BD0);
+    BYTE* v2 = (BYTE*)&view_point;
+    int i;
+    __int64 result;
+    v1 = 0x40;
+    for (i = 0; i < 0x40; ++i)
+    {
+        *v2 ^= v1;
+        result = (unsigned int)(i + 0x17);
+        v1 += i + 0x17;
+        v2++;
+    }
 }
 
 Vector2 project_world_to_screen(Vector3 world_location)
 {
-	cache::local_camera = get_view_angles();
+	cache::local_camera = get_view_point();
 	D3DMATRIX temp_matrix = to_matrix(cache::local_camera.rotation);
 	Vector3 vaxisx = Vector3(temp_matrix.m[0][0], temp_matrix.m[0][1], temp_matrix.m[0][2]);
 	Vector3 vaxisy = Vector3(temp_matrix.m[1][0], temp_matrix.m[1][1], temp_matrix.m[1][2]);
