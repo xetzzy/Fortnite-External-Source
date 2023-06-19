@@ -30,6 +30,7 @@ int main()
 		Sleep(3000);
 		exit(0);
 	}
+	driver.base_address = driver.get_base_address();
 	create_overlay();
 	directx_init();
 	render_loop();
