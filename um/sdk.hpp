@@ -189,7 +189,6 @@ Camera get_view_point()
     for (int i = 0; i < 0x40; ++i)
     {
         *v2 ^= v1;
-        __int64 result = (unsigned int)(i + 0x17);
         v1 += i + 0x17;
         v2++;
     }
