@@ -144,6 +144,7 @@ struct Camera
 	Vector3 location;
 	Vector3 rotation;
 	float fov;
+	char useless[0x18];
 };
 
 namespace cache
@@ -182,16 +183,13 @@ namespace cache
 
 Camera get_view_point()
 {
-    char v1;
     Camera view_point = driver.read<Camera>(driver.base_address + 0xF0E8BD0);
     BYTE* v2 = (BYTE*)&view_point;
-    int i;
-    __int64 result;
-    v1 = 0x40;
-    for (i = 0; i < 0x40; ++i)
+    char v1 = 0x40;
+    for (int i = 0; i < 0x40; ++i)
     {
         *v2 ^= v1;
-        result = (unsigned int)(i + 0x17);
+        __int64 result = (unsigned int)(i + 0x17);
         v1 += i + 0x17;
         v2++;
     }
