@@ -6,7 +6,7 @@ class _driver
 private:
 	typedef __int64(*NtUserFunction)(uintptr_t);
 	NtUserFunction nt_user_function = 0;
-	enum REQUEST_TYPE : INT
+	enum REQUEST_TYPE : int
 	{
 		NONE,
 		BASE,
