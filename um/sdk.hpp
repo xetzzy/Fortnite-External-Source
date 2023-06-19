@@ -183,7 +183,7 @@ namespace cache
 
 Camera get_view_point()
 {
-    Camera view_point = driver.read<Camera>(driver.base_address + 0xF0E8BD0);
+    Camera view_point = driver.read<Camera>(driver.base_address + ENCRYPTED_VIEW_POINT);
     BYTE* v2 = (BYTE*)&view_point;
     char v1 = 0x40;
     for (int i = 0; i < 0x40; ++i)
