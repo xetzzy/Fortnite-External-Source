@@ -68,7 +68,7 @@ public:
 		out.type = BASE;
 		out.pid = (HANDLE)process_id;
 		send_request(&out);
-		return out.base;
+		return (uintptr_t)out.base;
 	}
 	void writem(PVOID address, PVOID buffer, DWORD size)
 	{
