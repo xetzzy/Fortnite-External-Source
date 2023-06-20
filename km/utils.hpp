@@ -20,7 +20,7 @@ namespace utils
 	uintptr_t get_kernel_module(const char* name)
 	{
 		const PRTL_PROCESS_MODULES info = (PRTL_PROCESS_MODULES)get_system_information(SystemModuleInformation);
-		if (!info) return NULL;
+		if (!info) return 0;
 		for (size_t i = 0; i < info->NumberOfModules; ++i)
 		{
 			const auto& module = info->Modules[i];
@@ -32,7 +32,7 @@ namespace utils
 			}
 		}
 		ExFreePool(info);
-		return NULL;
+		return 0;
 	}
 	uintptr_t pattern_scan(uintptr_t base, size_t range, const char* pattern, const char* mask)
 	{
@@ -49,7 +49,7 @@ namespace utils
 		{
 			if (check_mask((const char*)base + i, pattern, mask)) return base + i;
 		}
-		return NULL;
+		return 0;
 	}
 	uintptr_t pattern_scan(uintptr_t base, const char* pattern, const char* mask)
 	{
@@ -149,21 +149,21 @@ namespace utils
 		if (!virtual_address) return 0;
 		return virtual_address + pageoffset;
 	}
-	uintptr_t get_base_address(PDRIVER_REQUEST in)
+	PVOID get_base_address(PDRIVER_REQUEST in)
 	{
-		if (!in->pid) return STATUS_UNSUCCESSFUL;
-		PEPROCESS process = NULL;
+		if (!in->pid) return 0;
+		PEPROCESS process = 0;
 		PsLookupProcessByProcessId((HANDLE)in->pid, &process);
-		if (!process) return STATUS_UNSUCCESSFUL;
+		if (!process) return 0;
 		PVOID image_base = PsGetProcessSectionBaseAddress(process);
-		if (!image_base) return STATUS_UNSUCCESSFUL;
+		if (!image_base) return 0;
 		ObDereferenceObject(process);
 		return image_base;
 	}
 	NTSTATUS write_process_memory(PDRIVER_REQUEST in)
 	{
 		if (!in->pid) return STATUS_UNSUCCESSFUL;
-		PEPROCESS process = NULL;
+		PEPROCESS process = 0;
 		PsLookupProcessByProcessId(in->pid, &process);
 		if (!process) return STATUS_UNSUCCESSFUL;
 		uintptr_t process_base = get_process_cr3(process);
@@ -171,14 +171,14 @@ namespace utils
 		uintptr_t physical_address = translate_linear(process_base, (uintptr_t)in->address);
 		if (!physical_address) return STATUS_UNSUCCESSFUL;
 		uintptr_t final_size = min(PAGE_SIZE - (physical_address & 0xFFF), in->size);
-		SIZE_T bytes_trough = NULL;
+		SIZE_T bytes_trough = 0;
 		write_physical_memory((PVOID)physical_address, in->buffer, final_size, &bytes_trough);
 		return STATUS_SUCCESS;
 	}
 	NTSTATUS read_process_memory(PDRIVER_REQUEST in)
 	{
 		if (!in->pid) return STATUS_UNSUCCESSFUL;
-		PEPROCESS process = NULL;
+		PEPROCESS process = 0;
 		PsLookupProcessByProcessId(in->pid, &process);
 		if (!process) return STATUS_UNSUCCESSFUL;
 		uintptr_t process_base = get_process_cr3(process);
@@ -187,7 +187,7 @@ namespace utils
 		uintptr_t physical_address = translate_linear(process_base, (uintptr_t)in->address);
 		if (!physical_address) return STATUS_UNSUCCESSFUL;
 		uintptr_t final_size = min(PAGE_SIZE - (physical_address & 0xFFF), in->size);
-		SIZE_T bytes_trough = NULL;
+		SIZE_T bytes_trough = 0;
 		read_physical_memory((PVOID)physical_address, in->buffer, final_size, &bytes_trough);
 		return STATUS_SUCCESS;
 	}
