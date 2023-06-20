@@ -155,7 +155,7 @@ typedef struct _DRIVER_REQUEST
 	PVOID address;
 	PVOID buffer;
 	SIZE_T size;
-	PVOID* base;
+	PVOID base;
 } DRIVER_REQUEST, *PDRIVER_REQUEST;
 
 extern "C"
