@@ -64,13 +64,11 @@ public:
 	}
 	uintptr_t get_base_address()
 	{
-		uintptr_t image_base = 0;
 		DRIVER_REQUEST out{};
 		out.type = BASE;
 		out.pid = (HANDLE)process_id;
-		out.base = (PVOID*)&image_base;
 		send_request(&out);
-		return image_base;
+		return out.base;
 	}
 	void writem(PVOID address, PVOID buffer, DWORD size)
 	{
