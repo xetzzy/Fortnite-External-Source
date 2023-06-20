@@ -153,6 +153,7 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="includes.hpp" />
     <ClInclude Include="input.hpp" />
+    <ClInclude Include="librarys.hpp" />
     <ClInclude Include="offsets.hpp" />
     <ClInclude Include="sdk.hpp" />
     <ClInclude Include="settings.hpp" />

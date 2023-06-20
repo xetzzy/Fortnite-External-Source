@@ -50,14 +50,10 @@ public:
 	}
 	bool setup()
 	{
-		const HMODULE user32 = LoadLibraryA("user32.dll");
-		if (!user32) return false;
-		nt_user_function = reinterpret_cast<NtUserFunction>(GetProcAddress(user32, "NtUserRegisterErrorReportingDialog"));
+		nt_user_function = reinterpret_cast<NtUserFunction>(GetProcAddress(librarys::user32, "NtUserRegisterErrorReportingDialog"));
 		if (!nt_user_function)
 		{
-			const HMODULE win32u = LoadLibraryA("win32u.dll");
-			if (!win32u) return false;
-			nt_user_function = reinterpret_cast<NtUserFunction>(GetProcAddress(win32u, "NtUserRegisterErrorReportingDialog"));
+			nt_user_function = reinterpret_cast<NtUserFunction>(GetProcAddress(librarys::win32u, "NtUserRegisterErrorReportingDialog"));
 			if (!nt_user_function) return false;
 		}
 		return true;

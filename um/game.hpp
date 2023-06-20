@@ -167,7 +167,6 @@ void game_loop()
 	cache::local_players = driver.read<uintptr_t>(driver.read<uintptr_t>(cache::game_instance + LOCAL_PLAYERS));
 	cache::player_controller = driver.read<uintptr_t>(cache::local_players + PLAYER_CONTROLLER);
 	cache::local_pawn = driver.read<uintptr_t>(cache::player_controller + LOCAL_PAWN);
-	if (!cache::local_pawn) return;
 	cache::root_component = driver.read<uintptr_t>(cache::local_pawn + ROOT_COMPONENT);
 	cache::relative_location = driver.read<Vector3>(cache::root_component + RELATIVE_LOCATION);
 	cache::player_state = driver.read<uintptr_t>(cache::local_pawn + PLAYER_STATE);

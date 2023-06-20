@@ -198,14 +198,10 @@ namespace gui
 	{
 		const DWORD dwerr = prepare_for_ui_access();
 		if (ERROR_SUCCESS != dwerr) return false;
-		const HMODULE user32 = LoadLibraryA("user32.dll");
-		if (!user32) return false;
-		create_window_in_band = reinterpret_cast<CreateWindowInBand>(GetProcAddress(user32, "CreateWindowInBand"));
+		create_window_in_band = reinterpret_cast<CreateWindowInBand>(GetProcAddress(librarys::user32, "CreateWindowInBand"));
 		if (!create_window_in_band)
 		{
-			const HMODULE win32u = LoadLibraryA("win32u.dll");
-			if (!win32u) return false;
-			create_window_in_band = reinterpret_cast<CreateWindowInBand>(GetProcAddress(win32u, "CreateWindowInBand"));
+			create_window_in_band = reinterpret_cast<CreateWindowInBand>(GetProcAddress(librarys::win32u, "CreateWindowInBand"));
 			if (!create_window_in_band) return false;
 		}
 		return true;

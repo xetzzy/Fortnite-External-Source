@@ -4,14 +4,10 @@ namespace input
 	static BYTE ntusersendinput_bytes[30];
 	static BOOLEAN WINAPI init()
 	{
-		const HMODULE user32 = LoadLibraryA("user32.dll");
-		if (!user32) return FALSE;
-		LPVOID ntusersendinput_addr = GetProcAddress(user32, "NtUserSendInput");
+		LPVOID ntusersendinput_addr = GetProcAddress(librarys::user32, "NtUserSendInput");
 		if (!ntusersendinput_addr)
 		{
-			const HMODULE win32u = LoadLibraryA("win32u.dll");
-			if (!win32u) return FALSE;
-			ntusersendinput_addr = GetProcAddress(win32u, "NtUserSendInput");
+			ntusersendinput_addr = GetProcAddress(librarys::win32u, "NtUserSendInput");
 			if (!ntusersendinput_addr) return FALSE;
 		}
 		memcpy(ntusersendinput_bytes, ntusersendinput_addr, 30);
