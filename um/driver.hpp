@@ -20,7 +20,7 @@ private:
 		PVOID address;
 		PVOID buffer;
 		SIZE_T size;
-		PVOID* base;
+		PVOID base;
 	} DRIVER_REQUEST, *PDRIVER_REQUEST;
 	void send_request(PDRIVER_REQUEST out)
 	{
