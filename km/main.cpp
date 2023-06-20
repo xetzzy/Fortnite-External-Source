@@ -9,7 +9,7 @@ void request_handler(uintptr_t request)
 	{
 		case BASE:
 		{
-			utils::get_base_address(in);
+			in->base = utils::get_base_address(in);
 			break;
 		}
 		case WRITE:
