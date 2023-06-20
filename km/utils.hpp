@@ -149,17 +149,16 @@ namespace utils
 		if (!virtual_address) return 0;
 		return virtual_address + pageoffset;
 	}
-	NTSTATUS get_base_address(PDRIVER_REQUEST in)
+	uintptr_t get_base_address(PDRIVER_REQUEST in)
 	{
 		if (!in->pid) return STATUS_UNSUCCESSFUL;
 		PEPROCESS process = NULL;
-		PsLookupProcessByProcessId(in->pid, &process);
+		PsLookupProcessByProcessId((HANDLE)in->pid, &process);
 		if (!process) return STATUS_UNSUCCESSFUL;
 		PVOID image_base = PsGetProcessSectionBaseAddress(process);
 		if (!image_base) return STATUS_UNSUCCESSFUL;
-		RtlCopyMemory(in->base, &image_base, sizeof(image_base));
 		ObDereferenceObject(process);
-		return STATUS_SUCCESS;
+		return image_base;
 	}
 	NTSTATUS write_process_memory(PDRIVER_REQUEST in)
 	{
