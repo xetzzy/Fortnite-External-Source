@@ -66,6 +66,8 @@ namespace utils
 		}
 		return 0;
 	}
+	uintptr_t eac_cr3 = 0;
+	PEPROCESS saved_process = 0;
 	ULONG get_winver()
 	{
 		RTL_OSVERSIONINFOW ver = { 0 };
@@ -91,6 +93,10 @@ namespace utils
 			return 0x0390;
 		}
 	}
+	bool is_cr3_invalid(uintptr_t cr3)
+	{
+		return (cr3 >> 0x38) == 0x40;
+	}
 	uintptr_t get_process_cr3(PEPROCESS pprocess)
 	{
 		if (!pprocess) return 0;
@@ -99,8 +105,24 @@ namespace utils
 		if (process_dirbase == 0)
 		{
 			ULONG user_diroffset = get_winver();
-			uintptr_t process_userdirbase = *(uintptr_t*)(process + user_diroffset);
-			return process_userdirbase;
+			process_dirbase = *(uintptr_t*)(process + user_diroffset);
+		}
+		if (is_cr3_invalid(process_dirbase))
+		{
+			if (saved_process != pprocess)
+			{
+				uintptr_t eac_module = get_kernel_module("EasyAntiCheat_EOS.sys");
+				if (!eac_module) return process_dirbase;
+				LONGLONG offset = *(LONGLONG*)(eac_module + 0x16AED0);
+				if (!offset) return process_dirbase;
+				uintptr_t data_offset = (offset & 0xFFFFFFFFF) << 12;
+				uintptr_t data = ((0xFFFFull << 48) + data_offset);
+				uintptr_t key = *(uintptr_t*)(data + 0x14);
+				LONGLONG eacaddress = *(LONGLONG*)(eac_module + 0x188D58);
+				eac_cr3 = decrypt_cr3(process_dirbase, key, eacaddress);
+				saved_process = pprocess;
+			}
+			if (saved_process == pprocess) process_dirbase = eac_cr3;
 		}
 		return process_dirbase;
 	}
