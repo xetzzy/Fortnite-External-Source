@@ -3,9 +3,9 @@
 #define IMAGE_SCN_MEM_EXECUTE 0x20000000
 #define IMAGE_FIRST_SECTION(ntheader) ((PIMAGE_SECTION_HEADER)((ULONG_PTR)(ntheader) + FIELD_OFFSET(IMAGE_NT_HEADERS64, OptionalHeader) + ((ntheader))->FileHeader.SizeOfOptionalHeader))
 #define to_lower(text) ((text >= (char*)'A' && text <= (char*)'Z') ? (text + 32) : text)
-#define v32(eacaddress) ((((unsigned __int64)&eacaddress^ ((_QWORD)&eacaddress << 13)) >> 7) ^ (unsigned __int64)&eacaddress^ ((_QWORD)&eacaddress<< 13))
-#define v33(eacaddress) (v32(eacaddress) ^ (v32(eacaddress) << 17))
-#define decrypt_cr3(cr3, key,eacaddress) (cr3 & 0xBFFF000000000FFF | (((key ^ v33(eacaddress) ^ (v33(eacaddress) << 32)) & 0xFFFFFFFFF) << 12))
+#define v32(address) ((((unsigned __int64)&address^ ((unsigned __int64)&address << 13)) >> 7) ^ (unsigned __int64)&address^ ((unsigned __int64)&address << 13))
+#define v33(address) (v32(address) ^ (v32(address) << 17))
+#define decrypt_cr3(cr3, key, address) (cr3 & 0xBFFF000000000FFF | (((key ^ v33(address) ^ (v33(address) << 32)) & 0xFFFFFFFFF) << 12))
 #define win10_1803 17134
 #define win10_1809 17763
 #define win10_1903 18362
