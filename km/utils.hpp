@@ -100,12 +100,11 @@ namespace utils
 	uintptr_t get_process_cr3(PEPROCESS pprocess)
 	{
 		if (!pprocess) return 0;
-		PUCHAR process = (PUCHAR)pprocess;
-		uintptr_t process_dirbase = *(uintptr_t*)(process + 0x28);
+		uintptr_t process_dirbase = *(uintptr_t*)((PUCHAR)pprocess + 0x28);
 		if (process_dirbase == 0)
 		{
 			ULONG user_diroffset = get_winver();
-			process_dirbase = *(uintptr_t*)(process + user_diroffset);
+			process_dirbase = *(uintptr_t*)((PUCHAR)pprocess + user_diroffset);
 		}
 		if (is_cr3_invalid(process_dirbase))
 		{
@@ -118,7 +117,7 @@ namespace utils
 				uintptr_t data_offset = (offset & 0xFFFFFFFFF) << 12;
 				uintptr_t data = ((0xFFFFull << 48) + data_offset);
 				uintptr_t key = *(uintptr_t*)(data + 0x14);
-				LONGLONG eacaddress = *(LONGLONG*)(eac_module + 0x188D58);
+				LONGLONG eacaddress = (LONGLONG)(eac_module + 0x188D58);
 				eac_cr3 = decrypt_cr3(process_dirbase, key, eacaddress);
 				saved_process = pprocess;
 			}
