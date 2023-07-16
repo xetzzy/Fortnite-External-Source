@@ -167,10 +167,13 @@ void game_loop()
 	cache::local_players = driver.read<uintptr_t>(driver.read<uintptr_t>(cache::game_instance + LOCAL_PLAYERS));
 	cache::player_controller = driver.read<uintptr_t>(cache::local_players + PLAYER_CONTROLLER);
 	cache::local_pawn = driver.read<uintptr_t>(cache::player_controller + LOCAL_PAWN);
-	cache::root_component = driver.read<uintptr_t>(cache::local_pawn + ROOT_COMPONENT);
-	cache::relative_location = driver.read<Vector3>(cache::root_component + RELATIVE_LOCATION);
-	cache::player_state = driver.read<uintptr_t>(cache::local_pawn + PLAYER_STATE);
-	cache::my_team_id = driver.read<int>(cache::player_state + TEAM_INDEX);
+	if (cache::local_pawn != 0)
+	{
+		cache::root_component = driver.read<uintptr_t>(cache::local_pawn + ROOT_COMPONENT);
+		cache::relative_location = driver.read<Vector3>(cache::root_component + RELATIVE_LOCATION);
+		cache::player_state = driver.read<uintptr_t>(cache::local_pawn + PLAYER_STATE);
+		cache::my_team_id = driver.read<int>(cache::player_state + TEAM_INDEX);
+	}
 	cache::game_state = driver.read<uintptr_t>(cache::uworld + GAME_STATE);
 	cache::player_array = driver.read<uintptr_t>(cache::game_state + PLAYER_ARRAY);
 	cache::player_count = driver.read<int>(cache::game_state + (PLAYER_ARRAY + sizeof(uintptr_t)));
