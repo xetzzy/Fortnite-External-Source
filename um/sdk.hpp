@@ -9,8 +9,7 @@ public:
 	Vector2() : x(0.f), y(0.f) {}
 	Vector2(double _x, double _y) : x(_x), y(_y) {}
 	~Vector2() {}
-	double x;
-	double y;
+	double x, y;
 };
 
 class Vector3
@@ -19,31 +18,13 @@ public:
 	Vector3() : x(0.f), y(0.f), z(0.f) {}
 	Vector3(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
 	~Vector3() {}
-	double x;
-	double y;
-	double z;
-	inline double dot(Vector3 v)
-	{
-		return x * v.x + y * v.y + z * v.z;
-	}
-	inline double distance(Vector3 v)
-	{
-		return double(sqrtf(powf(v.x - x, 2.0) + powf(v.y - y, 2.0) + powf(v.z - z, 2.0)));
-	}
-	Vector3 operator-(Vector3 v)
-	{
-		return Vector3(x - v.x, y - v.y, z - v.z);
-	}
+	double x, y, z;
+	inline double dot(Vector3 v) { return x * v.x + y * v.y + z * v.z; }
+	inline double distance(Vector3 v) { return double(sqrtf(powf(v.x - x, 2.0) + powf(v.y - y, 2.0) + powf(v.z - z, 2.0))); }
+	Vector3 operator-(Vector3 v) { return Vector3(x - v.x, y - v.y, z - v.z); }
 };
 
-struct FQuat
-{
-	double x;
-	double y;
-	double z;
-	double w;
-};
-
+struct FQuat { double x, y, z, w; };
 struct FTransform
 {
 	FQuat rot;
@@ -144,7 +125,6 @@ struct Camera
 	Vector3 location;
 	Vector3 rotation;
 	float fov;
-	char useless[0x18];
 };
 
 namespace cache
@@ -166,33 +146,15 @@ namespace cache
 	inline Camera local_camera;
 }
 
-/*Camera get_view_angles() old
-{
-	Camera local_camera{};
-	uintptr_t view_location = driver.read<uintptr_t>(cache::uworld + 0x110);
-	local_camera.location = driver.read<Vector3>(view_location);
-	uintptr_t view_matrix = driver.read<uintptr_t>(cache::local_players + 0xD0);
-	uintptr_t view_matrix_correct = driver.read<uintptr_t>(view_matrix + 0x8);
-	local_camera.fov = 80 / (driver.read<double>(view_matrix_correct + 0x7F0) / 1.19);
-	local_camera.rotation.x = driver.read<double>(view_matrix_correct + 0x9C0);
-	local_camera.rotation.y = driver.read<double>(cache::root_component + 0x148);
-	local_camera.rotation.x = (asin(local_camera.rotation.x)) * (180 / M_PI);
-	if (local_camera.rotation.y < 0) local_camera.rotation.y = 360 + local_camera.rotation.y;
-	return local_camera;
-}*/
-
 Camera get_view_point()
 {
-	char v1;
 	Camera view_point = driver.read<Camera>(driver.base_address + ENCRYPTED_VIEW_POINT);
 	BYTE* v2 = (BYTE*)&view_point;
-	int i;
-	__int64 result;
-	v1 = 0x40;
-	for (i = 0; i < 0x40; ++i)
+	char v1 = 0x40;
+	for (int i = 0; i < 0x40; ++i)
 	{
 		*v2 ^= v1;
-		result = (unsigned int)(i + 0x17);
+		__int64 result = (unsigned int)(i + 0x17);
 		v1 += i + 0x17;
 		v2++;
 	}
