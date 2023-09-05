@@ -112,12 +112,12 @@ namespace utils
 			{
 				uintptr_t eac_module = get_kernel_module("EasyAntiCheat_EOS.sys");
 				if (!eac_module) return process_dirbase;
-				LONGLONG offset = *(LONGLONG*)(eac_module + 0x16AED0);
+				LONGLONG offset = *(LONGLONG*)(eac_module + 0x1706A8);
 				if (!offset) return process_dirbase;
 				uintptr_t data_offset = (offset & 0xFFFFFFFFF) << 12;
 				uintptr_t data = ((0xFFFFull << 48) + data_offset);
 				uintptr_t key = *(uintptr_t*)(data + 0x14);
-				LONGLONG eacaddress = (LONGLONG)(eac_module + 0x188D58);
+				LONGLONG eacaddress = (LONGLONG)(eac_module + 0x18F7A0);
 				eac_cr3 = decrypt_cr3(process_dirbase, key, eacaddress);
 				saved_process = pprocess;
 			}
