@@ -188,6 +188,5 @@ bool is_visible(uintptr_t mesh)
 {
 	float last_sumbit_time = driver.read<float>(mesh + LAST_SUMBIT_TIME);
 	float last_render_time_on_screen = driver.read<float>(mesh + LAST_SUMBIT_TIME_ON_SCREEN);
-	bool visible = last_render_time_on_screen + 0.06f >= last_sumbit_time;
-	return visible;
+	return last_render_time_on_screen + 0.06f >= last_sumbit_time;
 }
