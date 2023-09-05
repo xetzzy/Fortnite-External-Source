@@ -94,7 +94,7 @@ void aimbot(uintptr_t target_mesh)
 {
 	if (!target_mesh) return;
 	if (!is_visible(target_mesh)) return;
-	Vector3 head3d = get_entity_bone(target_mesh, 106);
+	Vector3 head3d = get_entity_bone(target_mesh, 109);
 	Vector2 head2d = project_world_to_screen(head3d);
 	Vector2 target{};
 	if (head2d.x != 0)
@@ -190,13 +190,13 @@ void game_loop()
 		if (pawn_private == cache::local_pawn) continue;
 		uintptr_t mesh = driver.read<uintptr_t>(pawn_private + MESH);
 		if (!mesh) continue;
-		Vector3 head3d = get_entity_bone(mesh, 106);
+		Vector3 head3d = get_entity_bone(mesh, 109);
 		Vector2 head2d = project_world_to_screen(head3d);
 		Vector3 bottom3d = get_entity_bone(mesh, 0);
 		Vector2 bottom2d = project_world_to_screen(bottom3d);
 		float box_height = abs(head2d.y - bottom2d.y);
 		float box_width = box_height * 0.50f;
-		float distance = cache::relative_location.distance(bottom3d) / 100;
+		float distance = cache::relative_location.distance(bottom3d) / 100; //maybe broken
 		if (settings::visuals::enable)
 		{
 			if (settings::visuals::box)
