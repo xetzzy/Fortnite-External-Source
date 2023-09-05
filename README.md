@@ -1,7 +1,3 @@
-External Fortnite Cheat Source                                                                                         
-(27/06/2023):
-- EAC CR3 Decryptor
-
 Features:                                                                                                                    
 [Aimbot]
 - Fov Size
