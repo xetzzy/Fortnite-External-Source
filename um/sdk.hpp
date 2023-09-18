@@ -150,7 +150,7 @@ Camera get_view_point()
 {
 	Camera view_point{};
     	__int64 result = driver.read<__int64>(driver.base_address + ENCRYPTED_VIEW_POINT);
-    	__int64 v7 = driver.base_address + 0xE2CECD8;
+    	__int64 v7 = driver.base_address + (ENCRYPTED_VIEW_POINT + 0x40);
     	if (result) v7 = result;
     	__int64 encrypted_data[7];
     	for (int i = 0; i < 7; i++)
