@@ -148,16 +148,25 @@ namespace cache
 
 Camera get_view_point()
 {
-	Camera view_point = driver.read<Camera>(driver.base_address + ENCRYPTED_VIEW_POINT);
-	BYTE* v2 = (BYTE*)&view_point;
-	char v1 = 0x40;
-	for (int i = 0; i < 0x40; ++i)
+	Camera view_point{};
+    	__int64 result = driver.read<__int64>(driver.base_address + ENCRYPTED_VIEW_POINT);
+    	__int64 v7 = driver.base_address + 0xE2CECD8;
+    	if (result) v7 = result;
+    	__int64 encrypted_data[7];
+    	for (int i = 0; i < 7; i++)
 	{
-		*v2 ^= v1;
-		__int64 result = (unsigned int)(i + 0x17);
-		v1 += i + 0x17;
-		v2++;
+    		encrypted_data[i] = driver.read<__int64>(v7 + (i * 8));
+    		encrypted_data[0] ^= 0x4CF1F15DFE2D977Fi64;
+    		encrypted_data[1] ^= 0x4CF1F15DFE2D977Fi64;
+    		encrypted_data[2] ^= 0x4EF1F15DFE2D977Fi64;
+    		encrypted_data[3] ^= 0xAF29A7F813EFC5Ci64;
+    		encrypted_data[4] ^= 0xAF29A7F813EFC5Ci64;
+    		encrypted_data[5] ^= 0x4EF29A7E813EFC5Di64;
+    		encrypted_data[6] ^= 0x4E1772384C14291Fi64;
 	}
+    	view_point.location = { *(double*)(&encrypted_data[1]), *(double*)(&encrypted_data[0]), *(double*)(&encrypted_data[2]) };
+    	view_point.rotation = { *(double*)(&encrypted_data[4]), *(double*)(&encrypted_data[3]), *(double*)(&encrypted_data[5]) };
+    	view_point.fov = *(float*)(&encrypted_data[6]);
     	return view_point;
 }
 
