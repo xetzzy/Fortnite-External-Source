@@ -146,28 +146,29 @@ namespace cache
 	inline Camera local_camera;
 }
 
+struct FNRot
+{
+	double a;
+	char pad_0008[24];
+	double b;
+	char pad_0028[424];
+	double c;
+};
+
 Camera get_view_point()
 {
 	Camera view_point{};
-    	__int64 result = driver.read<__int64>(driver.base_address + ENCRYPTED_VIEW_POINT);
-    	__int64 v7 = driver.base_address + (ENCRYPTED_VIEW_POINT + 0x40);
-    	if (result) v7 = result;
-    	__int64 encrypted_data[7];
-    	for (int i = 0; i < 7; i++)
-	{
-    		encrypted_data[i] = driver.read<__int64>(v7 + (i * 8));
-    		encrypted_data[0] ^= 0x4CF1F15DFE2D977Fi64;
-    		encrypted_data[1] ^= 0x4CF1F15DFE2D977Fi64;
-    		encrypted_data[2] ^= 0x4EF1F15DFE2D977Fi64;
-    		encrypted_data[3] ^= 0xAF29A7F813EFC5Ci64;
-    		encrypted_data[4] ^= 0xAF29A7F813EFC5Ci64;
-    		encrypted_data[5] ^= 0x4EF29A7E813EFC5Di64;
-    		encrypted_data[6] ^= 0x4E1772384C14291Fi64;
-	}
-    	view_point.location = { *(double*)(&encrypted_data[1]), *(double*)(&encrypted_data[0]), *(double*)(&encrypted_data[2]) };
-    	view_point.rotation = { *(double*)(&encrypted_data[4]), *(double*)(&encrypted_data[3]), *(double*)(&encrypted_data[5]) };
-    	view_point.fov = *(float*)(&encrypted_data[6]);
-    	return view_point;
+	uintptr_t location_pointer = driver.read<uintptr_t>(cache::uworld + 0x110);
+	uintptr_t rotation_pointer = driver.read<uintptr_t>(cache::uworld + 0x120);
+	FNRot fnrot{};
+	fnrot.a = driver.read<double>(rotation_pointer);
+	fnrot.b = driver.read<double>(rotation_pointer + 0x20);
+	fnrot.c = driver.read<double>(rotation_pointer + 0x1D0);
+	view_point.location = driver.read<Vector3>(location_pointer);
+	view_point.rotation.x = asin(fnrot.c) * (180.0 / M_PI);
+	view_point.rotation.y = ((atan2(fnrot.a * -1, fnrot.b) * (180.0 / M_PI)) * -1) * -1;
+	view_point.fov = driver.read<float>(cache::player_controller + 0x394) * 90.f;
+	return view_point;
 }
 
 Vector2 project_world_to_screen(Vector3 world_location)
@@ -185,8 +186,8 @@ Vector2 project_world_to_screen(Vector3 world_location)
 
 Vector3 get_entity_bone(uintptr_t mesh, int bone_id)
 {
-	int is_cached = driver.read<int>(mesh + BONE_ARRAY_CACHE);
-	uintptr_t bone_array = driver.read<uintptr_t>(mesh + BONE_ARRAY + (is_cached * 0x10));
+	uintptr_t bone_array = driver.read<uintptr_t>(mesh + BONE_ARRAY);
+	if (bone_array == 0) bone_array = driver.read<uintptr_t>(mesh + BONE_ARRAY_CACHE);
 	FTransform bone = driver.read<FTransform>(bone_array + (bone_id * 0x60));
 	FTransform component_to_world = driver.read<FTransform>(mesh + COMPONENT_TO_WORLD);
 	D3DMATRIX matrix = matrix_multiplication(bone.to_matrix_with_scale(), component_to_world.to_matrix_with_scale());
