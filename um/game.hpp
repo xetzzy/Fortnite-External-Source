@@ -244,18 +244,14 @@ void game_loop()
 
 void render_menu()
 {
-	if (settings::aimbot::current_aimkey == 0)
+	switch (settings::aimbot::current_aimkey)
 	{
+	case 0:
 		settings::aimbot::current_key = VK_LBUTTON;
-	}
-	else if (settings::aimbot::current_aimkey == 1)
-	{
+	case 1:
 		settings::aimbot::current_key = VK_RBUTTON;
 	}
-	if (settings::aimbot::show_fov)
-	{
-		ImGui::GetForegroundDrawList()->AddCircle(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), settings::aimbot::fov, ImColor(250, 250, 250, 250), 100, 1.0f);
-	}
+	if (settings::aimbot::show_fov) ImGui::GetForegroundDrawList()->AddCircle(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), settings::aimbot::fov, ImColor(250, 250, 250, 250), 100, 1.0f);
 	if (GetAsyncKeyState(VK_INSERT) & 1) settings::show_menu = !settings::show_menu;
 	if (settings::show_menu)
 	{
@@ -270,7 +266,7 @@ void render_menu()
 		{
 			case 0:
 			{
-				ImGui::Checkbox("Enable Aimbot", &settings::aimbot::enable);
+				ImGui::Checkbox("Enable", &settings::aimbot::enable);
 				ImGui::Checkbox("Show Fov", &settings::aimbot::show_fov);
 				ImGui::SliderFloat("##Fov", &settings::aimbot::fov, 50, 300, "Fov: %.2f");
 				ImGui::SliderFloat("##Smoothness", &settings::aimbot::smoothness, 1, 10, "Smoothness: %.2f");
@@ -279,7 +275,7 @@ void render_menu()
 			}
 			case 1:
 			{
-				ImGui::Checkbox("Enable Visuals", &settings::visuals::enable);
+				ImGui::Checkbox("Enable", &settings::visuals::enable);
 				ImGui::Checkbox("Box", &settings::visuals::box);
 				ImGui::SameLine();
 				ImGui::Checkbox("Fill Box", &settings::visuals::fill_box);
