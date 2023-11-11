@@ -66,8 +66,6 @@ namespace utils
 		}
 		return 0;
 	}
-	uintptr_t eac_cr3 = 0;
-	PEPROCESS saved_process = 0;
 	ULONG get_winver()
 	{
 		RTL_OSVERSIONINFOW ver = { 0 };
@@ -93,35 +91,28 @@ namespace utils
 			return 0x0390;
 		}
 	}
-	bool is_cr3_invalid(uintptr_t cr3)
-	{
-		return (cr3 >> 0x38) == 0x40;
-	}
+	uintptr_t saved_dirbase = 0;
+	bool already_attached = false;
 	uintptr_t get_process_cr3(PEPROCESS pprocess)
 	{
 		if (!pprocess) return 0;
-		uintptr_t process_dirbase = *(uintptr_t*)((PUCHAR)pprocess + 0x28);
+		uintptr_t process_dirbase = *(uintptr_t*)((UINT8*)pprocess + 0x28);
 		if (process_dirbase == 0)
 		{
 			ULONG user_diroffset = get_winver();
-			process_dirbase = *(uintptr_t*)((PUCHAR)pprocess + user_diroffset);
+			process_dirbase = *(uintptr_t*)((UINT8*)pprocess + user_diroffset);
 		}
-		if (is_cr3_invalid(process_dirbase))
+		if ((process_dirbase >> 0x38) == 0x40)
 		{
-			if (saved_process != pprocess)
+			if (!already_attached) //find a way to reset this
 			{
-				uintptr_t eac_module = get_kernel_module("EasyAntiCheat_EOS.sys");
-				if (!eac_module) return process_dirbase;
-				LONGLONG offset = *(LONGLONG*)(eac_module + 0x1706A8);
-				if (!offset) return process_dirbase;
-				uintptr_t data_offset = (offset & 0xFFFFFFFFF) << 12;
-				uintptr_t data = ((0xFFFFull << 48) + data_offset);
-				uintptr_t key = *(uintptr_t*)(data + 0x14);
-				LONGLONG eacaddress = (LONGLONG)(eac_module + 0x18F7A0);
-				eac_cr3 = decrypt_cr3(process_dirbase, key, eacaddress);
-				saved_process = pprocess;
+				KAPC_STATE apc_state{};
+				KeStackAttachProcess(pprocess, &apc_state);
+				saved_dirbase = __readcr3();
+				KeUnstackDetachProcess(&apc_state);
+				already_attached = true;
 			}
-			if (saved_process == pprocess) process_dirbase = eac_cr3;
+			if (saved_dirbase) return saved_dirbase;
 		}
 		return process_dirbase;
 	}
