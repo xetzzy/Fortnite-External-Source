@@ -127,6 +127,15 @@ struct Camera
 	float fov;
 };
 
+struct FNRot
+{
+	double a;
+	char pad_0008[24];
+	double b;
+	char pad_0028[424];
+	double c;
+};
+
 namespace cache
 {
 	inline uintptr_t uworld;
@@ -135,7 +144,6 @@ namespace cache
 	inline uintptr_t player_controller;
 	inline uintptr_t local_pawn;
 	inline uintptr_t root_component;
-	inline Vector3 relative_location;
 	inline uintptr_t player_state;
 	inline int my_team_id;
 	inline uintptr_t game_state;
@@ -145,15 +153,6 @@ namespace cache
 	inline uintptr_t closest_mesh;
 	inline Camera local_camera;
 }
-
-struct FNRot
-{
-	double a;
-	char pad_0008[24];
-	double b;
-	char pad_0028[424];
-	double c;
-};
 
 Camera get_view_point()
 {
