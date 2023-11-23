@@ -179,7 +179,7 @@ void game_loop()
 	cache::player_count = driver.read<int>(cache::game_state + (PLAYER_ARRAY + sizeof(uintptr_t)));
 	cache::closest_distance = FLT_MAX;
 	cache::closest_mesh = NULL;
-	for (uint32_t i = 0; i < cache::player_count; i++)
+	for (int i = 0; i < cache::player_count; i++)
 	{
 		uintptr_t player_state = driver.read<uintptr_t>(cache::player_array + (i * sizeof(uintptr_t)));
 		if (!player_state) continue;
@@ -196,7 +196,7 @@ void game_loop()
 		Vector2 bottom2d = project_world_to_screen(bottom3d);
 		float box_height = abs(head2d.y - bottom2d.y);
 		float box_width = box_height * 0.50f;
-		float distance = cache::relative_location.distance(bottom3d) / 100; //maybe broken
+		float distance = cache::relative_location.distance(bottom3d) / 100;
 		if (settings::visuals::enable)
 		{
 			if (settings::visuals::box)
