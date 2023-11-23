@@ -14,29 +14,35 @@ int main()
 	system("cls");
 	if (!librarys::init())
 	{
-		printf("The librarys was not initialized!");
+		printf("The librarys was not initialized");
 		Sleep(3000);
 		exit(0);
 	}
 	if (!input::init())
 	{
-		printf("The input was not initialized!");
+		printf("The input was not initialized");
 		Sleep(3000);
 		exit(0);
 	}
 	if (!gui::init())
 	{
-		printf("The gui was not initialized!");
+		printf("The gui was not initialized");
 		Sleep(3000);
 		exit(0);
 	}
 	if (!driver.setup())
 	{
-		printf("The driver was not initialized!");
+		printf("The driver was not initialized");
 		Sleep(3000);
 		exit(0);
 	}
 	driver.base_address = driver.get_base_address();
+	if (!driver.base_address)
+	{
+		printf("The driver couldn't get the base address");
+		Sleep(3000);
+		exit(0);
+	}
 	create_overlay();
 	directx_init();
 	render_loop();
